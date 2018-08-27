@@ -32,35 +32,37 @@ class MainWindow(Frame):
         self.lbl_scaning.grid(row=3,column = 0)
         self.entry_scanning = Entry(self, textvariable = self.scaning)
         self.entry_scanning.grid(row= 3, column = 1)
-        self.txt_output = Text(self, width = 60, height = 10)
+        self.txt_output = ScrolledText(self, width = 60)
         self.txt_output.grid(row = 4, column = 1)
         
     def scan(self,host, port = '1:1024'):
-        if re.match('\d+\.\d+\.\d+.\d+\:\d+\.\d+\.\d+.\d+',host):
-            hostlist = re.split(':', host)
+        if re.match('^\d+\.\d+\.\d+.\d+\:\d+\.\d+\.\d+.\d+$',host):
+            starthost = re.split(':', host)[0]
+            endhost = re.split(':', host)[1]
+            hostlist = self.__hostlist__(starthost, endhost)
 
-        elif re.match('\d+\.\d+\.\d+.\d+\[0-32]$'):
-            
+        elif re.match('^\d+\.\d+\.\d+.\d+\\(^[0-9]$|^[1-2]\d$|^3[0-2]$)$',host):
+            bits = int(re.split('\\', host)[1])
 
         elif re.match('\d+\.\d+\.\d+.\d+$',host):
             hostlist = [host]
-        
-       if re.match('\d+\:\d+', port):
-           start= int(re.split(':', port)[0])
-           end = int(re.split(':',port)[1])
+
+        if re.match('\d+\:\d+', port):
+           start= int(re.split('\:', port)[0])
+           end = int(re.split('\:',port)[1])
            portlist = range(start, end+1)            
-       
-       elif re.match('\d+\,',port):
+
+        elif re.match('\d+\,',port):
            portlist = re.split(',', port)
           
-       elif re.match('\d+$', port):
+        elif re.match('^\d+$', port):
            addr = (host, int(port))
            self.scaning = str(port)
            portlist = [port]
         for hostx in hostlist:
             for portx in portlist:
                 self.__checkPort(hostx, portx)
-    def __checkPort(self,host, port):
+    def __checkPort(self, host, port):
         addr = (host, int(port))
         try:
             s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -78,7 +80,21 @@ class MainWindow(Frame):
         s.close()
 
 
+    def __hostlist__(starthost, endhost)
+        intstarthost = struct.unpack('!I', socket.inet_aton(starthost))
+        intendhost = struct.unpack('!I', socket.inet_aton(endhost))
+        if intstarthost > intendhost:
+            ex = intstarthost
+            intstarthost = intendhost
+            intendhost = ex
+        inthost = intstarthost
+        while inthost <=intendhost:
+            strhost = socket.inet_ntoa(struct.pack('!I', inthost)
+            yield strhost
+            inthost = inthost + 1
 
+        
+        
 
 
 main = MainWindow()
